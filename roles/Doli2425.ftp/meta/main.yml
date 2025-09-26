@@ -1,0 +1,20 @@
+galaxy_info:
+  role_name: ftp
+  namespace: Doli2425
+  author: "고태원"
+  description: "FTP server role (vsftpd 기반)"
+  license: GPL-2.0-or-later
+  min_ansible_version: 2.14
+
+  platforms:
+    - name: EL
+      versions:
+        - 9
+
+  galaxy_tags:
+    - ftp
+    - vsftpd
+    - server
+
+dependencies: []
+

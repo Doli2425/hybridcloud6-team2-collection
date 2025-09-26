@@ -1,0 +1,9 @@
+---
+# SQL Server Edition
+mssql_pid: "Developer"   # Developer / Express / Evaluation / Standard / Enterprise
+# SA 비밀번호는 외부에서 넘겨받음:
+# - mssql_sa_password (권장, Vault로 암호화해 전달)
+# 또는
+# - vault_mssql_sa_password (기존 네이밍과 호환용)
+#
+

@@ -1,0 +1,128 @@
+---
+# 0) (선택) Apache 제거/중지 — 포트 80/443 충돌 예방
+- name: Remove Apache httpd if requested
+  ansible.builtin.yum:
+    name: httpd
+    state: absent
+  when: remove_httpd | bool
+
+- name: Stop/disable Apache httpd (if present)
+  ansible.builtin.service:
+    name: httpd
+    state: stopped
+    enabled: false
+  ignore_errors: true
+  when: not (remove_httpd | bool)
+
+# 1) 필수 패키지 설치
+- name: Install base packages (Java, Nginx, MariaDB, Tomcat, tools, firewalld)
+  ansible.builtin.dnf:
+    name:
+      - java-11-openjdk
+      - nginx
+      - mariadb-server
+      - tomcat
+      - tomcat-webapps
+      - wget
+      - tar
+      - firewalld
+      - python3-firewall
+    state: present
+
+# 2) firewalld 활성화
+- name: Enable & start firewalld
+  ansible.builtin.service:
+    name: firewalld
+    enabled: true
+    state: started
+
+# 3) 방화벽 오픈 (컬렉션 없이 idempotent)
+- name: Query current firewall open ports
+  ansible.builtin.command: firewall-cmd --list-ports
+  register: fw_list
+  changed_when: false
+
+- name: Open required ports
+  ansible.builtin.shell: |
+    if ! firewall-cmd --list-ports | grep -qw "{{ item }}"; then
+      firewall-cmd --permanent --add-port={{ item }}
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: fw_add
+  changed_when: "'changed' in fw_add.stdout"
+  loop: "{{ web_open_ports }}"
+
+- name: Reload firewalld if any port changed
+  ansible.builtin.command: firewall-cmd --reload
+  when: fw_add is changed
+
+# 4) SELinux 부울 (리버스 프록시 시 유용)
+- name: Enable SELinux boolean httpd_can_network_connect (persistent)
+  ansible.builtin.command: setsebool -P httpd_can_network_connect on
+  when: enable_selinux_httpd_can_network | bool
+  changed_when: false
+  failed_when: false
+
+# 5) Tomcat 활성화/시작
+- name: Enable & start tomcat
+  ansible.builtin.service:
+    name: tomcat
+    enabled: true
+    state: started
+
+# 6) Nginx 리버스 프록시 설정 배포
+- name: Deploy Nginx reverse-proxy config for Tomcat
+  ansible.builtin.template:
+    src: nginx-tomcat.conf.j2
+    dest: /etc/nginx/conf.d/tomcat.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart nginx
+
+# 7) Nginx 설정 검사
+- name: Nginx config test
+  ansible.builtin.command: nginx -t
+  register: nginx_test
+  changed_when: false
+  failed_when: nginx_test.rc != 0
+
+# 8) Nginx 안전 기동 (실행 중이면 reload, 아니면 start)
+- name: Check if nginx is active
+  ansible.builtin.command: systemctl is-active nginx
+  register: nginx_active
+  changed_when: false
+  failed_when: false
+
+- name: Nginx reload (if active)
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded
+  when: nginx_active.rc == 0
+
+- name: Nginx start (if inactive)
+  ansible.builtin.service:
+    name: nginx
+    state: started
+  when: nginx_active.rc != 0
+
+# 9) MariaDB 활성화/시작 (옵션)
+- name: Enable & start MariaDB (if enabled)
+  ansible.builtin.service:
+    name: mariadb
+    enabled: true
+    state: started
+  when: enable_mariadb | bool
+
+# 10) 디버그: 80/443/3306 점유 현황 출력 (문제 분석용)
+- name: Show listeners on 80/443/3306
+  ansible.builtin.shell: "ss -ltnp | egrep ':80|:443|:3306' || true"
+  register: port_listeners
+  changed_when: false
+
+- name: Debug listeners
+  ansible.builtin.debug:
+    var: port_listeners.stdout_lines
+

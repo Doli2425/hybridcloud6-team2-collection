@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  namespace: cong-0306
+  role_name: common
+  author: kim soo min
+  description: Install base packages for monitoring (epel, pwgen, JDK 1.8)
+  license: MIT
+  min_ansible_version: "2.12"
+  platforms:
+    - name: EL
+      versions: ["8", "9"]
+  galaxy_tags: [common, base]
+
+dependencies: []
+

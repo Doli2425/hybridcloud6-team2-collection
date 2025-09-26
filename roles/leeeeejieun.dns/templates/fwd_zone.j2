@@ -1,0 +1,11 @@
+$TTL 86400
+@       IN SOA  {{ ns_server.name }}. {{ ns_server.email | default("root." + ns_server.domain) }} (
+                                        10      ; serial  
+                                        1D      ; refresh 
+                                        1H      ; retry  
+                                        1W      ; expire 
+                                        3H )    ; minimum 
+
+;; DNS Server
+{{ ns_server.domain }}.  IN  NS  {{ ns_server.name }}.
+{{ ns_server.name }}.    IN  A   {{ ns_server.ip }}

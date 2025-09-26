@@ -1,0 +1,26 @@
+---
+- name: Add MongoDB repository
+  ansible.builtin.copy:
+    dest: /etc/yum.repos.d/mongodb-org.repo
+    content: |
+      [mongodb-org-6.0]
+      name=MongoDB Repository
+      baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/6.0/x86_64/
+      gpgcheck=1
+      enabled=1
+      gpgkey=https://www.mongodb.org/static/pgp/server-6.0.asc
+
+- name: Install MongoDB
+  ansible.builtin.yum:
+    name: mongodb-org
+    state: present
+
+- name: Reload systemd
+  ansible.builtin.command: systemctl daemon-reload
+
+- name: Enable and start MongoDB
+  ansible.builtin.systemd:
+    name: mongod
+    enabled: yes
+    state: started
+

@@ -1,0 +1,78 @@
+---
+- name: Import Elasticsearch GPG key
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+- name: Add Elasticsearch repository
+  ansible.builtin.copy:
+    dest: /etc/yum.repos.d/elasticsearch.repo
+    content: |
+      [elasticsearch-oss-7.x]
+      name=Elasticsearch repository for 7.x packages
+      baseurl=https://artifacts.elastic.co/packages/oss-7.x/yum
+      gpgcheck=1
+      gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      enabled=1
+      autorefresh=1
+      type=rpm-md
+
+- name: Install Elasticsearch OSS
+  ansible.builtin.yum:
+    name: elasticsearch-oss
+    state: present
+
+- name: Configure elasticsearch.yml (cluster name)
+  ansible.builtin.lineinfile:
+    path: /etc/elasticsearch/elasticsearch.yml
+    regexp: '^cluster.name:'
+    line: 'cluster.name: graylog'
+    state: present
+
+- name: Add action.auto_create_index
+  ansible.builtin.lineinfile:
+    path: /etc/elasticsearch/elasticsearch.yml
+    line: 'action.auto_create_index: false'
+    insertafter: EOF
+
+- name: Reload and restart Elasticsearch
+  ansible.builtin.systemd:
+    name: elasticsearch
+    enabled: yes
+    state: restarted
+
+# ---- firewalld 준비 (포트 오픈 전에 설치/시작 보장) ----
+- name: Ensure firewalld is installed
+  ansible.builtin.package:
+    name: firewalld
+    state: present
+
+- name: Ensure firewalld is running and enabled
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: yes
+
+# ---- 포트 오픈: immediate 제거, 핸들러로 reload ----
+- name: Open firewall ports for Graylog
+  ansible.posix.firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+  loop:
+    - 9000/tcp
+    - 1514/tcp
+    - 1514/udp
+  notify: Reload firewalld
+
+- name: Ensure rsyslog forwards logs to Graylog
+  ansible.builtin.lineinfile:
+    path: /etc/rsyslog.conf
+    line: "*.* @{{ graylog_host }}:{{ graylog_syslog_port }}"
+    insertafter: EOF
+
+- name: Restart rsyslog
+  ansible.builtin.systemd:
+    name: rsyslog
+    state: restarted
+

@@ -1,0 +1,93 @@
+---
+- name: Install Graylog repository RPM
+  ansible.builtin.command:
+    cmd: rpm -Uvh https://packages.graylog2.org/repo/packages/graylog-5.1-repository_latest.rpm
+    creates: /etc/yum.repos.d/graylog.repo
+
+
+- name: Install Graylog server
+  ansible.builtin.yum:
+    name: graylog-server
+    state: present
+
+- name: Generate password_secret
+  ansible.builtin.command: pwgen -N 1 -s 96
+  register: password_secret
+  changed_when: false
+
+- name: Set root password SHA2
+  ansible.builtin.set_fact:
+    root_password_sha2: "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
+
+- name: Configure Graylog server.conf - password_secret
+  ansible.builtin.lineinfile:
+    path: /etc/graylog/server/server.conf
+    regexp: '^password_secret ='
+    line: "password_secret = {{ password_secret.stdout }}"
+    state: present
+
+- name: Configure Graylog server.conf - root_password_sha2
+  ansible.builtin.lineinfile:
+    path: /etc/graylog/server/server.conf
+    regexp: '^root_password_sha2 ='
+    line: "root_password_sha2 = {{ root_password_sha2 }}"
+    state: present
+
+- name: Configure Graylog server.conf - root_timezone
+  ansible.builtin.lineinfile:
+    path: /etc/graylog/server/server.conf
+    regexp: '^root_timezone ='
+    line: "root_timezone = Asia/Seoul"
+    state: present
+
+- name: Configure Graylog server.conf - elasticsearch_shards
+  ansible.builtin.lineinfile:
+    path: /etc/graylog/server/server.conf
+    regexp: '^elasticsearch_shards ='
+    line: "elasticsearch_shards = 1"
+    state: present
+
+- name: Configure Graylog server.conf - http_bind_address
+  ansible.builtin.lineinfile:
+    path: /etc/graylog/server/server.conf
+    regexp: '^http_bind_address ='
+    #line: "http_bind_address = 192.168.80.10:9000"
+    line: "http_bind_address = 0.0.0.0:{{ graylog_web_port }}"
+    state: present
+
+- name: Reload and restart Graylog server
+  ansible.builtin.systemd:
+    name: graylog-server
+    enabled: yes
+    state: restarted
+
+- name: Ensure firewalld is running
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Open Graylog web port 9000/tcp
+  ansible.builtin.firewalld:
+    port: 9000/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+    zone: public
+
+- name: Open Graylog syslog port 1514/tcp
+  ansible.builtin.firewalld:
+    port: 1514/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+    zone: public
+
+- name: Open Graylog syslog port 1514/udp
+  ansible.builtin.firewalld:
+    port: 1514/udp
+    permanent: yes
+    state: enabled
+    immediate: yes
+    zone: public
+

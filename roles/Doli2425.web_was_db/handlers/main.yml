@@ -1,0 +1,11 @@
+---
+- name: Restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+
+- name: Restart tomcat
+  ansible.builtin.service:
+    name: tomcat
+    state: restarted
+

@@ -1,0 +1,23 @@
+galaxy_info:
+  role_name: web_was_db
+  namespace: Doli2425
+  author: "고태원"
+  description: "Web-WAS-DB stack role (Nginx + Tomcat + MariaDB)"
+  license: GPL-2.0-or-later
+  min_ansible_version: 2.14
+
+  platforms:
+    - name: EL
+      versions:
+        - 9
+
+  galaxy_tags:
+    - web
+    - nginx
+    - tomcat
+    - mariadb
+    - was
+    - db
+
+dependencies: []
+

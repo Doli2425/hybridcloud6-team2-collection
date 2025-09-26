@@ -1,0 +1,5 @@
+roles:
+  - name: Doli2425.ftp
+  - name: Doli2425.web_was_db
+  - name: Goyunjae99.mssql
+  - name: leeeeejieun.dns

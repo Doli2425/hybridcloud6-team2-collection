@@ -1,0 +1,27 @@
+listen=YES
+listen_ipv6=NO
+anonymous_enable=NO
+local_enable=YES
+write_enable=YES
+xferlog_enable=YES
+use_localtime=YES
+connect_from_port_20=YES
+
+listen_port={{ listen_port }}
+
+idle_session_timeout=600
+data_connection_timeout=120
+
+pasv_enable=YES
+pasv_min_port={{ pasv_min_port }}
+pasv_max_port={{ pasv_max_port }}
+
+chroot_local_user=YES
+allow_writeable_chroot=YES
+chroot_list_enable=YES
+chroot_list_file=/etc/vsftpd/chroot_list
+
+userlist_enable=YES
+userlist_deny=NO
+userlist_file=/etc/vsftpd/user_list
+

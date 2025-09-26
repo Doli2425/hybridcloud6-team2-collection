@@ -1,0 +1,72 @@
+- name: Setup FTP
+  hosts: ftpservers
+  become: true
+  roles:
+    - { role: Doli2425.ftp, tags: ['ftp'] }
+
+- name: Setup Web/WAS/DB
+  hosts: webservers
+  become: true
+  roles:
+    - { role: Doli2425.web_was_db, tags: ['webwasdb'] }
+
+- name: Setup DNS
+  hosts: dnsservers
+  become: true
+  roles:
+    - { role: leeeeejieun.dns, tags: ['dns'] }
+
+- name: Setup MSSQL
+  hosts: mssqlservers
+  become: true
+  roles:
+    - { role: Goyunjae99.mssql, tags: ['mssql'] }
+
+- name: Setup Monitoring
+  hosts: monitoring
+  become: true
+  roles:
+    - { role: cong-0306.common, tags: ['monitoring'] }
+    - { role: cong-0306.elasticsearch, tags: ['monitoring'] }
+    - { role: cong-0306.mongodb, tags: ['monitoring'] }
+    - { role: cong-0306.graylog, tags: ['monitoring'] }
+
+- name: Setup Web_nfs
+  hosts: nfs
+  become: true
+  roles:
+    - { role: kangbum01.nfs, tags: ['mail'] }
+
+- name: Setup Web servers
+  hosts: web
+  become: true
+  vars:
+    httpd_listen_port: 8081
+  pre_tasks:
+    - name: Force Apache to listen on custom port
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^\s*Listen\s+\d+'
+        line: 'Listen {{ httpd_listen_port }}'
+
+    - name: Allow custom port in SELinux
+      command: "semanage port -a -t http_port_t -p tcp {{ httpd_listen_port }}"
+      register: semanage_res
+      failed_when: semanage_res.rc not in [0,1]
+      changed_when: semanage_res.rc == 0
+
+    - name: Open firewall for custom port
+      firewalld:
+        port: "{{ httpd_listen_port }}/tcp"
+        permanent: yes
+        state: enabled
+        immediate: yes
+  roles:
+    - { role: kangbum01.web, tags: ['mail'] }
+
+- name: Setup web_lb
+  hosts: lb
+  become: true
+  roles:
+    - { role: kangbum01.lb, tags: ['mail'] }
+

@@ -1,0 +1,1 @@
+# ansible-reole-graylog

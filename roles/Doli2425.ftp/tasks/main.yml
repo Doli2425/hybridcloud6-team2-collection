@@ -1,0 +1,78 @@
+---
+# 1) 패키지 설치
+- name: firewalld & vsftpd 설치
+  ansible.builtin.dnf:
+    name:
+      - firewalld
+      - python3-firewall
+      - vsftpd
+      - ftp
+    state: present
+
+# 2) firewalld 서비스 활성화
+- name: firewalld 활성화
+  ansible.builtin.systemd:
+    name: firewalld
+    enabled: true
+    state: started
+
+# 3) vsftpd.conf 배포
+- name: vsftpd.conf 배포
+  ansible.builtin.template:
+    src: vsftpd.conf.j2
+    dest: /etc/vsftpd/vsftpd.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart vsftpd
+
+# 4) 허용 사용자 목록
+- name: 허용 사용자 리스트 생성
+  ansible.builtin.copy:
+    dest: /etc/vsftpd/user_list
+    mode: '0644'
+    content: |-
+      {% for u in ftp_allowed_users %}{{ u }}
+      {% endfor %}
+  notify: Restart vsftpd
+
+# 5) chroot_list 생성
+- name: chroot_list 파일 보장
+  ansible.builtin.file:
+    path: /etc/vsftpd/chroot_list
+    state: touch
+    mode: '0644'
+  notify: Restart vsftpd
+
+# 6) 방화벽 포트 개방 (컬렉션 없이)
+- name: 포트 {{ listen_port }}/tcp 확인
+  ansible.builtin.command: firewall-cmd --query-port={{ listen_port }}/tcp
+  register: q_main
+  changed_when: false
+  failed_when: false
+
+- name: 포트 {{ listen_port }}/tcp 개방
+  ansible.builtin.command: firewall-cmd --permanent --add-port={{ listen_port }}/tcp
+  when: q_main.rc != 0
+
+- name: 패시브 포트 범위 확인
+  ansible.builtin.command: firewall-cmd --query-port={{ pasv_min_port }}-{{ pasv_max_port }}/tcp
+  register: q_pass
+  changed_when: false
+  failed_when: false
+
+- name: 패시브 포트 범위 개방
+  ansible.builtin.command: firewall-cmd --permanent --add-port={{ pasv_min_port }}-{{ pasv_max_port }}/tcp
+  when: q_pass.rc != 0
+
+- name: firewalld reload
+  ansible.builtin.command: firewall-cmd --reload
+  when: (q_main.rc != 0) or (q_pass.rc != 0)
+
+# 7) vsftpd 서비스 활성화
+- name: vsftpd 서비스 시작
+  ansible.builtin.systemd:
+    name: vsftpd
+    enabled: true
+    state: started
+

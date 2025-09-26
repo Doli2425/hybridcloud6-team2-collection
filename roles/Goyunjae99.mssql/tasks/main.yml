@@ -1,0 +1,146 @@
+---
+# ===== SQL Server 2022 on RHEL/CentOS 9 =====
+# - EULA 자동 동의 (mssql-conf, msodbcsql18/mssql-tools18)
+# - 서비스 기동 보장 + 1433 대기
+# - IPv4(127.0.0.1) 강제 접속 + 재시도
+# - 실패 시 상태/로그/소켓 진단 출력
+
+- name: Base tools
+  ansible.builtin.dnf:
+    name:
+      - curl
+      - firewalld
+    state: present
+
+- name: Enable & start firewalld
+  ansible.builtin.systemd:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: Add SQL Server repo
+  ansible.builtin.get_url:
+    url: https://packages.microsoft.com/config/rhel/9/mssql-server-2022.repo
+    dest: /etc/yum.repos.d/mssql-server.repo
+    mode: '0644'
+
+- name: Install SQL Server engine
+  ansible.builtin.dnf:
+    name: mssql-server
+    state: present
+    update_cache: true
+
+- name: Install SELinux policy (optional)
+  ansible.builtin.dnf:
+    name: mssql-server-selinux
+    state: present
+  ignore_errors: true
+
+- name: Configure SQL Server (accept EULA, set SA password, edition)
+  ansible.builtin.command:
+    cmd: /opt/mssql/bin/mssql-conf -n setup accept-eula
+  environment:
+    MSSQL_SA_PASSWORD: "{{ mssql_sa_password | default(vault_mssql_sa_password) }}"
+    MSSQL_PID: "{{ mssql_pid }}"
+  args:
+    creates: /var/opt/mssql/data/master.mdf
+
+- name: Ensure SQL Server service is running
+  ansible.builtin.systemd:
+    name: mssql-server
+    state: started
+    enabled: true
+
+# 방화벽: 모듈로 idempotent 적용
+- name: Open port 1433/tcp (firewalld)
+  ansible.posix.firewalld:
+    port: 1433/tcp
+    permanent: true
+    immediate: true
+    state: enabled
+
+- name: Add Microsoft prod repo (tools)
+  ansible.builtin.get_url:
+    url: https://packages.microsoft.com/config/rhel/9/prod.repo
+    dest: /etc/yum.repos.d/msprod.repo
+    mode: '0644'
+
+# tools 설치 시 EULA 비대화식 동의
+- name: Install msodbcsql18
+  ansible.builtin.dnf:
+    name: msodbcsql18
+    state: present
+  environment:
+    ACCEPT_EULA: "Y"
+
+- name: Install mssql-tools18 & unixODBC-devel
+  ansible.builtin.dnf:
+    name:
+      - mssql-tools18
+      - unixODBC-devel
+    state: present
+  environment:
+    ACCEPT_EULA: "Y"
+
+- name: Add tools path to all users
+  ansible.builtin.copy:
+    dest: /etc/profile.d/mssql-tools.sh
+    mode: '0644'
+    content: |
+      export PATH="$PATH:/opt/mssql-tools18/bin"
+
+# 서버가 포트를 열 때까지 대기 (IPv4/IPv6 상관없이 포트만 감시)
+- name: Wait for SQL Server to listen on 1433
+  ansible.builtin.wait_for:
+    port: 1433
+    delay: 5
+    timeout: 300
+
+# 약간의 여유 시간
+- name: Small grace period after port open
+  ansible.builtin.pause:
+    seconds: 3
+
+# 접속 테스트: IPv4로 강제(127.0.0.1,1433), 타임아웃 연장, 재시도 포함
+- name: Validate SQL Server with SELECT @@VERSION (IPv4, trusted cert, retries)
+  block:
+    - name: Query version via sqlcmd
+      ansible.builtin.shell: |
+        source /etc/profile.d/mssql-tools.sh
+        /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 -U SA -P '{{ mssql_sa_password | default(vault_mssql_sa_password) }}' -C -l 30 -Q "SELECT @@VERSION"
+      register: version_out
+      changed_when: false
+      retries: 6
+      delay: 10
+      until: version_out.rc == 0
+
+    - name: Show SQL Server version
+      ansible.builtin.debug:
+        var: version_out.stdout
+
+  rescue:
+    - name: Show mssql-server status
+      ansible.builtin.shell: systemctl status mssql-server --no-pager
+      register: mssql_status
+      changed_when: false
+
+    - name: Show last errorlog lines
+      ansible.builtin.shell: tail -n 100 /var/opt/mssql/log/errorlog
+      register: mssql_errorlog
+      changed_when: false
+
+    - name: Show listening sockets
+      ansible.builtin.shell: ss -lntp | grep -E '1433|sqlservr' || true
+      register: mssql_sockets
+      changed_when: false
+
+    - name: Dump diagnostics
+      ansible.builtin.debug:
+        msg:
+          - "STATUS: {{ mssql_status.stdout | default('') }}"
+          - "SOCKETS: {{ mssql_sockets.stdout | default('') }}"
+          - "ERRORLOG: {{ mssql_errorlog.stdout | default('') }}"
+    - name: Fail with message
+      ansible.builtin.fail:
+        msg: "SQL Server not reachable on 127.0.0.1:1433. See diagnostics above."
+

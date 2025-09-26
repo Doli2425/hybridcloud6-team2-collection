@@ -1,0 +1,22 @@
+---
+# Nginx 서버명
+web_server_name: "localhost"
+
+# Tomcat 연결 포트
+tomcat_port: 8080
+
+# 방화벽 오픈 포트
+web_open_ports:
+  - "80/tcp"
+  - "443/tcp"
+  - "3306/tcp"
+
+# Apache(httpd) 제거/중지 여부 (포트 충돌 방지)
+remove_httpd: true
+
+# SELinux: httpd가 외부 네트워크 연결 허용 (리버스 프록시 시 유용)
+enable_selinux_httpd_can_network: true
+
+# MariaDB 기동 여부
+enable_mariadb: true
+
