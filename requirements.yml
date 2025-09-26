@@ -3,3 +3,11 @@ roles:
   - name: Doli2425.web_was_db
   - name: Goyunjae99.mssql
   - name: leeeeejieun.dns
+  - name: kangbum01.web
+  - name: kangbum01.lb
+  - name: kangbum01.nfs
+  - name: cong-0306.common
+  - name: cong-0306.elasticsearch
+  - name: cong-0306.graylog
+  - name: cong-0306.mongodb
+
