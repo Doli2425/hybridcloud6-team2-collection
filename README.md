@@ -49,20 +49,24 @@ FTP, Web/WAS/DB, MSSQL, DNS, LB, NFS, Monitoring(Graylog, Elasticsearch, MongoDB
 * **전체 실행**
 
   ```bash
-  ansible-playbook -i inventory.ini playbooks.yml -K
+  ansible-playbook -i inventory.ini playbooks.yml -K \
+    --vault-password-file ~/.vault_pass.txt
   ```
 
 * **특정 태그 실행**
 
   ```bash
-  ansible-playbook -i inventory.ini playbooks.yml -K --tags "ftp,web"
+  ansible-playbook -i inventory.ini playbooks.yml -K \
+  --tags "mail" \
+  --vault-password-file ~/.vault_pass.txt
   ```
 
-* **Vault 암호 파일 사용**
+* **특정 태그만 스킵**
 
   ```bash
   ansible-playbook -i inventory.ini playbooks.yml -K \
-    --vault-password-file ~/.vault_pass.txt
+  --skip-tags "monitoring" \
+  --vault-password-file ~/.vault_pass.txt
   ```
 
 ---
