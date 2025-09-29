@@ -80,3 +80,94 @@ ansible-playbook playbooks.yml --skip-tags "monitoring"
 | `cong-0306.elasticsearch`        |             |               | Elasticsearch 설치 및 설정             |
 | `cong-0306.graylog`              |             |               | Graylog 로그 수집/분석                 |
 | `cong-0306.mongodb`              |             |               | MongoDB 설치 및 설정                   |
+<table>
+  <thead>
+    <tr>
+      <th>Role 이름</th>
+      <th>작성자</th>
+      <th>실행 태그</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Doli2425 단독들 -->
+    <tr>
+      <td><code>Doli2425.ftp</code></td>
+      <td>Doli2425</td>
+      <td><code>ftp</code></td>
+      <td>FTP 서버 설치 및 설정</td>
+    </tr>
+    <tr>
+      <td><code>Doli2425.web_was_db</code></td>
+      <td>Doli2425</td>
+      <td><code>webwasdb</code></td>
+      <td>
+        Web/WAS/DB 환경 통합 구축<br>
+        • <b>단일 서버</b>: 웹+WAS+DB 통합<br>
+        • <b>이중화</b>: 웹 2대 + DB 1대
+      </td>
+    </tr>
+
+    <!-- Mail (외부 Role) -->
+    <tr>
+      <td><code>FakePhDKo.Real_Mail_Role</code></td>
+      <td>FakePhDKo</td>
+      <td><code>mail</code></td>
+      <td>
+        Mail 서버 Role<br>
+        • <b>단일 서버</b>: 단일 메일 서비스<br>
+        • <b>이중화</b>: Mail + Web 연동
+      </td>
+    </tr>
+
+    <!-- MSSQL / DNS 단독 -->
+    <tr>
+      <td><code>Goyunjae99.mssql</code></td>
+      <td>Goyunjae99</td>
+      <td><code>mssql</code></td>
+      <td>MSSQL 설치 및 초기 설정</td>
+    </tr>
+    <tr>
+      <td><code>leeeeejieun.dns</code></td>
+      <td>leeeeejieun</td>
+      <td><code>dns</code></td>
+      <td>DNS(BIND) 서버 구성</td>
+    </tr>
+
+    <!-- kangbum01 묶음 (작성자/태그 병합: rowspan=3) -->
+    <tr>
+      <td><code>kangbum01.web</code></td>
+      <td rowspan="3">kangbum01</td>
+      <td rowspan="3"><code>web</code></td>
+      <td>Web 서버 구성 (vhost 지원)</td>
+    </tr>
+    <tr>
+      <td><code>kangbum01.lb</code></td>
+      <td>HAProxy 기반 Load Balancer 구성</td>
+    </tr>
+    <tr>
+      <td><code>kangbum01.nfs</code></td>
+      <td>NFS 서버 구성</td>
+    </tr>
+
+    <!-- cong-0306 묶음 (작성자/태그 병합: rowspan=4) -->
+    <tr>
+      <td><code>cong-0306.common</code></td>
+      <td rowspan="4">cong-0306</td>
+      <td rowspan="4"><code>monitoring</code></td>
+      <td>공통 패키지 및 기본 설정</td>
+    </tr>
+    <tr>
+      <td><code>cong-0306.elasticsearch</code></td>
+      <td>Elasticsearch 설치 및 설정</td>
+    </tr>
+    <tr>
+      <td><code>cong-0306.graylog</code></td>
+      <td>Graylog 로그 수집/분석</td>
+    </tr>
+    <tr>
+      <td><code>cong-0306.mongodb</code></td>
+      <td>MongoDB 설치 및 설정</td>
+    </tr>
+  </tbody>
+</table>
