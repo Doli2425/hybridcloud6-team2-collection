@@ -6,16 +6,17 @@ FTP, Web/WAS/DB, MSSQL, DNS, LB, NFS, Monitoring(Graylog, Elasticsearch, MongoDB
 ---
 
 ## 📑 목차
+1. [필수 사항](#1-필수-사항)
+2. [설치 방법](#2-설치-방법)
+3. [Vault 초기화](#3-vault-초기화)
+4. [플레이북 실행](#4-플레이북-실행)
+5. [Role 목록](#5-role-목록)
+6. [구성 참고](#6-구성-참고)
 
-1. [요구사항]
-2. [설치 방법]
-3. [Vault 초기화]
-4. [플레이북 실행]
-5. [Role 목록]
-
+   
 ---
 
-## 1. ⚙ 요구사항
+## 1. 필수 사항
 
 * **Ansible** 2.14 이상 (CentOS Stream 9 기준 테스트됨)
 * **Python** 3.9 이상
@@ -23,7 +24,7 @@ FTP, Web/WAS/DB, MSSQL, DNS, LB, NFS, Monitoring(Graylog, Elasticsearch, MongoDB
 
 ---
 
-## 2. 📥 설치 방법
+## 2. 설치 방법
 
 **저장소 클론**
 
@@ -37,7 +38,7 @@ FTP, Web/WAS/DB, MSSQL, DNS, LB, NFS, Monitoring(Graylog, Elasticsearch, MongoDB
    ```
 👉 requirements.yml 에 정의된 모든 Role 이 자동 설치됩니다.
 
-## 3. 🔑 Vault 초기화
+## 3. Vault 초기화
    이 프로젝트는 비밀번호 파일을 직접 올리지 않고, 자동 생성 스크립트(setup_vault.sh)를 제공합니다.
    클론 받은 뒤 최초 1회 실행만 하면 됩니다.
    ```bash
@@ -45,7 +46,7 @@ FTP, Web/WAS/DB, MSSQL, DNS, LB, NFS, Monitoring(Graylog, Elasticsearch, MongoDB
    ```
 실행 후 프로젝트 루트에 vault_pass.txt 가 자동 생성되며, Ansible 실행 시 자동으로 사용됩니다.
 
-## 4. 🚀 플레이북 실행
+## 4. 플레이북 실행
 
 * 전체 실행 (추가 옵션 불필요)
 ```bash
@@ -63,7 +64,7 @@ ansible-playbook playbooks.yml --skip-tags "monitoring"
 ```
 📌 -K(sudo password) 입력이나 --vault-password-file 옵션을 따로 줄 필요 없음.
 
-## 5. 📂 Role 목록
+## 5. Role 목록
 
 <table>
   <thead>
@@ -144,3 +145,21 @@ ansible-playbook playbooks.yml --skip-tags "monitoring"
   </tbody>
 </table>
 
+
+## 6. 구성 참고
+
+현재 저장소는 **Mail 서버 1대** 기준으로 작성되었습니다.  
+→ 관련 변수는 host_vars/localhost.yml 에 정의되어 있습니다.  
+
+만약 Mail 서버를 **2대 이상**으로 구성하고 싶다면,  
+기존 host_vars/localhost.yml 파일을 그대로 사용하되,  
+아래와 같이 목록(mail_servers) 형태로 여러 서버 정보를 추가하면 됩니다.
+
+* 예시:
+
+```yaml
+# host_vars/localhost.yml
+mail_servers:
+  - { my_ip: 192.168.10.11, my_host: mail1 }
+  - { my_ip: 192.168.10.12, my_host: mail2 }
+```
