@@ -66,9 +66,10 @@ ansible-playbook playbooks.yml --skip-tags "monitoring"
 
 ## 5. 📂 Role 목록
 
-<table>
-  <thead>
-    <tr>
+
+<table/>
+  <thead/>
+    <tr/>
       <th>Role 이름</th>
       <th>작성자</th>
       <th>실행 태그</th>
