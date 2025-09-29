@@ -74,9 +74,9 @@ ansible-playbook playbooks.yml --skip-tags "monitoring"
 | `Goyunjae99.mssql`          | Goyunjae99                    | mssql      | MSSQL 설치 및 초기 설정                                              |
 | `leeeeejieun.dns`           | leeeeejieun                   | dns        | DNS(BIND) 서버 구성                                                  |
 | `kangbum01.web`             | kangbum01                     | web        | Web 서버 구성 (vhost 지원)                                           |
-| `kangbum01.lb`              | kangbum01                     | lb         | HAProxy 기반 Load Balancer 구성                                      |
-| `kangbum01.nfs`             | kangbum01                     | nfs        | NFS 서버 구성                                                        |
-| `cong-0306.common`          | cong-0306                     | common     | 공통 패키지 및 기본 설정                                             |
-| `cong-0306.elasticsearch`   | cong-0306                     | elastic    | Elasticsearch 설치 및 설정                                           |
-| `cong-0306.graylog`         | cong-0306                     | graylog    | Graylog 로그 수집/분석                                               |
-| `cong-0306.mongodb`         | cong-0306                     | mongodb    | MongoDB 설치 및 설정                                                 |
+| `kangbum01.lb`              | kangbum01                     | web         | HAProxy 기반 Load Balancer 구성                                      |
+| `kangbum01.nfs`             | kangbum01                     | web        | NFS 서버 구성                                                        |
+| `cong-0306.common`          | cong-0306                     | monitoring   | 공통 패키지 및 기본 설정                                             |
+| `cong-0306.elasticsearch`   | cong-0306                     | monitoring   | Elasticsearch 설치 및 설정                                           |
+| `cong-0306.graylog`         | cong-0306                     | monitoring   | Graylog 로그 수집/분석                                               |
+| `cong-0306.mongodb`         | cong-0306                     | monitoring   | MongoDB 설치 및 설정                                                 |
