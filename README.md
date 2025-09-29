@@ -20,7 +20,6 @@ FTP, Web/WAS/DB, MSSQL, DNS, LB, NFS, Monitoring(Graylog, Elasticsearch, MongoDB
 * **Ansible** 2.14 이상 (CentOS Stream 9 기준 테스트됨)
 * **Python** 3.9 이상
 * **sudo 권한**이 있는 계정
-* `setup_vault.sh` 실행 시 프로젝트 전용 `vault_pass.txt` 자동 생성
 
 ---
 
