@@ -1,7 +1,7 @@
 # 🌐 Hybridcloud6 Team2 Collection
 
 본 저장소는 **하이브리드 클라우드 환경 구축**을 위한 Ansible Role 모음집입니다.  
-FTP, Web/WAS/DB, MSSQL, DNS, LB, NFS, Monitoring(Graylog, Elasticsearch, MongoDB) 등 다양한 서비스를 자동화할 수 있습니다.
+FTP, Web/WAS/DB, MSSQL, DNS, LB, NFS, Monitoring(Graylog, Elasticsearch, MongoDB), web 이중화 등 다양한 서비스를 자동화할 수 있습니다.
 
 ---
 
