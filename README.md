@@ -38,7 +38,7 @@ FTP, Web/WAS/DB, MSSQL, DNS, LB, NFS, Monitoring(Graylog, Elasticsearch, MongoDB
    ```
 👉 requirements.yml 에 정의된 모든 Role 이 자동 설치됩니다.
 
-3. **🔑 Vault 초기화**
+## 3. 🔑 Vault 초기화
    이 프로젝트는 비밀번호 파일을 직접 올리지 않고, 자동 생성 스크립트(setup_vault.sh)를 제공합니다.
    클론 받은 뒤 최초 1회 실행만 하면 됩니다.
    ```bash
@@ -46,7 +46,7 @@ FTP, Web/WAS/DB, MSSQL, DNS, LB, NFS, Monitoring(Graylog, Elasticsearch, MongoDB
    ```
 실행 후 프로젝트 루트에 vault_pass.txt 가 자동 생성되며, Ansible 실행 시 자동으로 사용됩니다.
 
-4. **🚀 플레이북 실행**
+## 4. 🚀 플레이북 실행
 
 * 전체 실행 (추가 옵션 불필요)
 ```bash
