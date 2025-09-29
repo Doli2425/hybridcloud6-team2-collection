@@ -1,0 +1,19 @@
+# /etc/postfix/main.cf
+{% if inventory_hostname == 'ansible1.example.com' %}
+myhostname = ansible1.example1.com
+mydomain = example1.com
+{% elif inventory_hostname == 'ansible2.example.com' %}
+myhostname = ansible2.example2.com
+mydomain = example2.com
+{% endif %}
+myorigin = $mydomain
+inet_interfaces = all
+inet_protocols = ipv4
+mydestination = $myhostname, localhost.$mydomain, localhost
+mynetworks = 127.0.0.0/8, 192.168.10.0/24
+disable_dns_lookups = yes
+smtpd_recipient_restrictions =
+    permit_mynetworks,
+    permit_sasl_authenticated,
+    reject_unauth_destination
+# relayhost = {{ other_hostname }}

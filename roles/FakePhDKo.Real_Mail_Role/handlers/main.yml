@@ -1,0 +1,11 @@
+---
+# handlers file for roles/mail_server
+- name: Postfix 재시작
+  ansible.builtin.service:
+    name: postfix
+    state: restarted
+
+- name: 방화벽 재로드
+  ansible.builtin.service:
+    name: firewalld
+    state: reloaded

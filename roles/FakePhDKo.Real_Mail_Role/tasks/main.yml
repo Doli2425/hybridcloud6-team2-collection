@@ -1,0 +1,43 @@
+---
+- name: 1) 패키지 설치 - Postfix, Firewalld
+  ansible.builtin.dnf:
+    name: "{{ mail_server_mail_packages }}"
+    state: present
+
+- name: 2) 서비스 기동 및 활성화
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ mail_server_mail_services }}"
+
+- name: 3) hosts 파일 설정
+  ansible.builtin.template:
+    src: hosts.j2
+    dest: /etc/hosts
+    mode: '0644'
+    owner: root
+    group: root
+  notify:
+    - Postfix 재시작
+
+- name: 4) Postfix 설정 파일 배포
+  ansible.builtin.template:
+    src: main.cf.j2
+    dest: /etc/postfix/main.cf
+    mode: '0644'
+    owner: root
+    group: root
+  notify:
+    - Postfix 재시작
+
+- name: 5) 방화벽 포트 등록
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  loop: "{{ mail_server_fw_services }}"
+  notify:
+    - 방화벽 재로드
+# tasks file for roles/mail_server

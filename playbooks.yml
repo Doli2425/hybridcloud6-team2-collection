@@ -35,7 +35,7 @@
   hosts: nfs
   become: true
   roles:
-    - { role: kangbum01.nfs, tags: ['mail'] }
+    - { role: kangbum01.nfs, tags: ['web'] }
 
 - name: Setup Web servers
   hosts: web
@@ -62,11 +62,16 @@
         state: enabled
         immediate: yes
   roles:
-    - { role: kangbum01.web, tags: ['mail'] }
+    - { role: kangbum01.web, tags: ['web'] }
 
 - name: Setup web_lb
   hosts: lb
   become: true
   roles:
-    - { role: kangbum01.lb, tags: ['mail'] }
+    - { role: kangbum01.lb, tags: ['web'] }
 
+- name: Setup Mail
+  hosts: mail
+  become: true
+  roles:
+    - { role: FakePhDKo.Real_Mail_Role, tags: ['mail'] }

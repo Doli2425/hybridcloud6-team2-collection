@@ -1,0 +1,16 @@
+---
+# vars file for roles/mail_server
+mail_server_mail_packages:
+  - postfix
+  - firewalld
+  - s-nail
+  - telnet
+
+mail_server_mail_services:
+  - postfix
+  - firewalld
+
+mail_server_fw_services:
+  - smtp
+  - smtps
+  - telnet

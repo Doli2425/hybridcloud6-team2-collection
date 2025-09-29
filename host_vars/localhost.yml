@@ -1,0 +1,10 @@
+# host_vars/localhost.yml
+my_hostname: localhost
+my_host: localhost
+my_ip: 127.0.0.1
+
+# 단일 노드 실습이면 other_*도 자기 자신으로 둡니다
+other_hostname: localhost
+other_host: localhost
+other_ip: 127.0.0.1
+
