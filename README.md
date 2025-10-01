@@ -70,6 +70,7 @@ sudo systemctl start mssql-server
 /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 \
   -U SA -P "p@ssw0rd" -C -l 30 \
   -Q "SELECT @@VERSION"
+```
 
 ## 4. 플레이북 실행
 
