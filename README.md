@@ -46,6 +46,31 @@ FTP, Web/WAS/DB, MSSQL, DNS, LB, NFS, Monitoring(Graylog, Elasticsearch, MongoDB
    ```
 실행 후 프로젝트 루트에 vault_pass.txt 가 자동 생성되며, Ansible 실행 시 자동으로 사용됩니다.
 
+## 🔑 MSSQL SA 비밀번호 초기화 (최초 1회 필요)
+
+👉 MSSQL Role을 사용하려면 실제 서버의 `SA` 계정 비밀번호를 Vault에 맞춰야 합니다.  
+Vault 기본 비밀번호는 `p@ssw0rd` 입니다.
+
+아래 절차를 클론 후 최초 1회 실행하세요:
+
+```bash
+# 0) Vault 비밀번호 파일 생성 (이미 실행했다면 생략 가능)
+./setup_vault.sh
+
+# 1) MSSQL 정지
+sudo systemctl stop mssql-server
+
+# 2) SA 비밀번호 재설정 (프롬프트에서 2회 입력)
+sudo /opt/mssql/bin/mssql-conf set-sa-password
+
+# 3) MSSQL 기동
+sudo systemctl start mssql-server
+
+# 4) 테스트 접속
+/opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1,1433 \
+  -U SA -P "p@ssw0rd" -C -l 30 \
+  -Q "SELECT @@VERSION"
+
 ## 4. 플레이북 실행
 
 * 전체 실행 (추가 옵션 불필요)
